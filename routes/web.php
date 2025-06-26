@@ -4,6 +4,7 @@ use App\Http\Controllers\UserDetailController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 use App\Models\User;
+use App\Http\Controllers\MessageController;
 
 Route::get('/', function () {
     return Inertia::render('welcome');
@@ -25,6 +26,11 @@ Route::middleware(['auth', 'verified'])->group(function () {
             'users' => $users,
         ]);
     })->name('chat');
+
+    Route::get('chat/{user}', [MessageController::class, 'index'])->name('chat.conversation');
+    Route::post('messages', [MessageController::class, 'store'])->name('messages.store');
+    Route::get('messages/conversation/{user}', [MessageController::class, 'conversation'])->name('messages.conversation');
+    Route::delete('messages/{id}', [MessageController::class, 'destroy'])->name('messages.destroy');
 });
 
 require __DIR__.'/settings.php';

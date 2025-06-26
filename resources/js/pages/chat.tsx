@@ -1,5 +1,5 @@
 import AppLayout from '@/layouts/app-layout';
-import { Head, usePage } from '@inertiajs/react';
+import { Head, usePage, Link } from '@inertiajs/react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useState } from 'react';
@@ -33,7 +33,9 @@ export default function Chat() {
               </CardHeader>
               <CardContent className="flex items-center justify-between">
                 <span className="text-muted-foreground">{user.email}</span>
-                <Button onClick={() => setChattingWith(user)} size="sm">Chat</Button>
+                <Button asChild size="sm">
+                  <Link href={`/chat/${user.id}`}>Chat</Link>
+                </Button>
               </CardContent>
             </Card>
           ))}
