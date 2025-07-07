@@ -123,7 +123,7 @@ export default function Crud() {
                 onSuccess: (page) => {
                     // Try to get the updated detail from the response if available
                     if (page?.props?.userDetails && Array.isArray(page.props.userDetails)) {
-                        const updated = page.props.userDetails.find((d: any) => d.id === editingDetail.id);
+                        const updated = page.props.userDetails.find((d: UserDetail) => d.id === editingDetail.id);
                         if (updated) {
                             dispatch(updateUserDetail(updated));
                         }

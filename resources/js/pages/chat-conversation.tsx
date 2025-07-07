@@ -30,7 +30,7 @@ interface PageProps {
   otherUser: User;
   messages: Message[];
   auth: { user: User };
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 function getInitials(name: string) {
@@ -51,7 +51,6 @@ export default function ChatConversation() {
   const [processing, setProcessing] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const [deleteDialog, setDeleteDialog] = useState<{ open: boolean; messageId: number | null }>({ open: false, messageId: null });
-  const [deleteType, setDeleteType] = useState<'myself' | 'both' | null>(null);
   const chatContainerRef = useRef<HTMLDivElement>(null);
   const [isAtBottom, setIsAtBottom] = useState(true);
 
@@ -137,7 +136,6 @@ export default function ChatConversation() {
         : msg
     )));
     setDeleteDialog({ open: false, messageId: null });
-    setDeleteType(null);
   };
 
   // Group messages by sender and time proximity (5 min window)
@@ -209,7 +207,7 @@ export default function ChatConversation() {
                   </div>
                   <span className="font-medium text-xs text-neutral-500">{user.name}</span>
                 </div>
-                {group.messages.map((msg, j) => {
+                {group.messages.map((msg) => {
                   if (isMe && msg.deleted_by_sender) return null;
                   return (
                     <div
