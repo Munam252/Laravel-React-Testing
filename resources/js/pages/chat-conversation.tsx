@@ -5,6 +5,9 @@ import { useRef, useEffect, useState } from 'react';
 import axios from 'axios';
 import { Dialog } from '@headlessui/react';
 import { ExclamationTriangleIcon } from '@radix-ui/react-icons';
+import { useDispatch, useSelector } from 'react-redux';
+import { setMessages, addMessage, setOtherUser } from '../store/chatSlice';
+import type { RootState } from '../store';
 
 interface User {
   id: number;
@@ -40,8 +43,10 @@ function getInitials(name: string) {
 
 export default function ChatConversation() {
   const { props } = usePage<PageProps>();
-  const { otherUser, auth } = props;
-  const [messages, setMessages] = useState<Message[]>(props.messages || []);
+  const dispatch = useDispatch();
+  const messages = useSelector((state: RootState) => state.chat.messages);
+  const otherUserState = useSelector((state: RootState) => state.chat.otherUser) || props.otherUser;
+  const { auth } = props;
   const [content, setContent] = useState('');
   const [processing, setProcessing] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -49,6 +54,13 @@ export default function ChatConversation() {
   const [deleteType, setDeleteType] = useState<'myself' | 'both' | null>(null);
   const chatContainerRef = useRef<HTMLDivElement>(null);
   const [isAtBottom, setIsAtBottom] = useState(true);
+
+  // On mount, initialize Redux state
+  useEffect(() => {
+    dispatch(setMessages(props.messages || []));
+    dispatch(setOtherUser(props.otherUser));
+    // eslint-disable-next-line
+  }, [props.messages, props.otherUser]);
 
   // Scroll handler to track if user is at the bottom
   const handleScroll = () => {
@@ -68,19 +80,33 @@ export default function ChatConversation() {
   // Poll for new messages every 2 seconds
   useEffect(() => {
     const interval = setInterval(async () => {
-      const { data } = await axios.get(`/messages/conversation/${otherUser.id}`);
-      setMessages((prev) => {
-        // Only scroll if new message is added
-        if (data.messages.length > prev.length && isAtBottom) {
+      const { data } = await axios.get(`/messages/conversation/${otherUserState.id}`);
+      dispatch(setMessages(data.messages));
+      dispatch(setOtherUser(data.otherUser));
+      // Only scroll if new message is added
+      setIsAtBottom((prev) => {
+        if (data.messages.length > messages.length && prev) {
           setTimeout(() => {
             messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
           }, 100);
         }
-        return data.messages;
+        return prev;
       });
     }, 2000);
     return () => clearInterval(interval);
-  }, [otherUser.id, isAtBottom]);
+  }, [otherUserState.id, isAtBottom, dispatch, messages.length]);
+
+  // Typing indicator logic
+  let typingTimeout: NodeJS.Timeout | null = null;
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setContent(e.target.value);
+    sendTypingStatus(true);
+    if (typingTimeout) clearTimeout(typingTimeout);
+    typingTimeout = setTimeout(() => sendTypingStatus(false), 1500);
+  };
+  const sendTypingStatus = (isTyping: boolean) => {
+    axios.post('/user/typing', { is_typing: isTyping });
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -88,16 +114,13 @@ export default function ChatConversation() {
     setProcessing(true);
     try {
       const { data } = await axios.post('/messages', {
-        receiver_id: otherUser.id,
+        receiver_id: otherUserState.id,
         content,
       });
-      setMessages((prev) => {
-        // Always scroll to bottom when sending
-        setTimeout(() => {
-          messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-        }, 100);
-        return [...prev, data.message];
-      });
+      dispatch(addMessage(data.message));
+      setTimeout(() => {
+        messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+      }, 100);
       setContent('');
     } finally {
       setProcessing(false);
@@ -106,15 +129,13 @@ export default function ChatConversation() {
 
   const handleDelete = async (id: number, forBoth: boolean) => {
     await axios.delete(`/messages/${id}`, { data: { for_both: forBoth } });
-    setMessages((prev) =>
-      prev.map((msg) =>
-        msg.id === id
-          ? forBoth
-            ? { ...msg, is_deleted_for_both: true }
-            : { ...msg, deleted_by_sender: true }
-          : msg
-      )
-    );
+    dispatch(setMessages(messages.map((msg) =>
+      msg.id === id
+        ? forBoth
+          ? { ...msg, is_deleted_for_both: true }
+          : { ...msg, deleted_by_sender: true }
+        : msg
+    )));
     setDeleteDialog({ open: false, messageId: null });
     setDeleteType(null);
   };
@@ -145,22 +166,22 @@ export default function ChatConversation() {
   const isOtherUserOnline = true;
 
   return (
-    <AppLayout breadcrumbs={[{ title: 'Chat', href: '/chat' }, { title: otherUser.name, href: `/chat/${otherUser.id}` }]}> 
-      <Head title={`Chat with ${otherUser.name}`} />
+    <AppLayout breadcrumbs={[{ title: 'Chat', href: '/chat' }, { title: otherUserState.name, href: `/chat/${otherUserState.id}` }]}> 
+      <Head title={`Chat with ${otherUserState.name}`} />
       <div className="flex flex-col gap-0 p-0 max-w-2xl mx-auto h-[90vh] rounded-2xl shadow-2xl border border-neutral-200 dark:border-neutral-800 overflow-hidden relative" style={{ background: 'linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%)' }}>
         {/* Header */}
         <div className="flex items-center gap-3 px-6 py-4 border-b border-neutral-200 dark:border-neutral-800 bg-white/80 dark:bg-neutral-800/80 backdrop-blur-md">
           <div className="relative flex items-center justify-center w-12 h-12 rounded-full bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-200 font-bold text-xl shadow">
-            {otherUser.avatar ? (
-              <img src={otherUser.avatar} alt={otherUser.name} className="w-12 h-12 rounded-full object-cover" />
+            {otherUserState.avatar ? (
+              <img src={otherUserState.avatar} alt={otherUserState.name} className="w-12 h-12 rounded-full object-cover" />
             ) : (
-              getInitials(otherUser.name)
+              getInitials(otherUserState.name)
             )}
             <span className={`absolute bottom-0 right-0 w-3 h-3 rounded-full border-2 border-white dark:border-neutral-800 ${isOtherUserOnline ? 'bg-green-400' : 'bg-gray-400'}`}></span>
           </div>
           <div>
-            <div className="font-semibold text-lg">{otherUser.name}</div>
-            <div className="text-xs text-neutral-500">{otherUser.email}</div>
+            <div className="font-semibold text-lg">{otherUserState.name}</div>
+            <div className="text-xs text-neutral-500">{otherUserState.email}</div>
           </div>
         </div>
         {/* Messages */}
@@ -174,7 +195,7 @@ export default function ChatConversation() {
           )}
           {groupMessages(messages).map((group, i) => {
             const isMe = group.sender_id === auth.user.id;
-            const user = isMe ? auth.user : otherUser;
+            const user = isMe ? auth.user : otherUserState;
             return (
               <div key={i} className={`mb-6 flex flex-col ${isMe ? 'items-end' : 'items-start'}`}> 
                 {/* Show avatar and name above first message in group */}
@@ -235,7 +256,7 @@ export default function ChatConversation() {
           <input
             className="flex-1 border-none rounded-full px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400 bg-neutral-100 dark:bg-neutral-800 text-black dark:text-white shadow"
             value={content}
-            onChange={e => setContent(e.target.value)}
+            onChange={handleInputChange}
             placeholder="Type a message..."
             disabled={processing}
             autoFocus
