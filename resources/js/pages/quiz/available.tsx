@@ -1,3 +1,22 @@
+// TypeScript interfaces for Quiz and Question
+interface Question {
+    id: number;
+    quiz_id: number;
+    question: string;
+    options: string[];
+    correct_index: number;
+}
+
+interface Quiz {
+    id: number;
+    user_id: number;
+    topic: string;
+    description: string;
+    questions: Question[];
+    created_at: string;
+    updated_at: string;
+}
+
 import AppLayout from '@/layouts/app-layout';
 import { Head } from '@inertiajs/react';
 import { useEffect, useState } from 'react';
@@ -7,7 +26,7 @@ import { Badge } from '@/components/ui/badge';
 import { Eye } from 'lucide-react';
 
 export default function AvailableQuizzes() {
-    const [quizzes, setQuizzes] = useState<any[]>([]);
+    const [quizzes, setQuizzes] = useState<Quiz[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
     const [attemptedQuizIds, setAttemptedQuizIds] = useState<number[]>([]);
@@ -46,7 +65,7 @@ export default function AvailableQuizzes() {
                         </div>
                     )}
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        {quizzes.map((quiz: any) => {
+                        {quizzes.map((quiz) => {
                             const attempted = attemptedQuizIds.includes(quiz.id);
                             const score = quizScores[quiz.id];
                             return (
