@@ -36,7 +36,7 @@ export default function QuizList() {
             const res = await fetch('/quiz/api/list');
             const data = await res.json();
             setQuizzes(data.quizzes || []);
-        } catch (e) {
+        } catch {
             setError('Failed to load quizzes.');
         } finally {
             setLoading(false);
@@ -64,7 +64,7 @@ export default function QuizList() {
                 setSuccess('Quiz deleted successfully.');
                 setQuizzes(qs => qs.filter(q => q.id !== id));
             }
-        } catch (e) {
+        } catch {
             setError('Failed to delete quiz.');
         }
     };
