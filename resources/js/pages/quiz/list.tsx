@@ -6,8 +6,25 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Separator } from '@/components/ui/separator';
 import { Edit, Trash2, Eye } from 'lucide-react';
 
+interface Question {
+    id: number;
+    quiz_id: number;
+    question: string;
+    options: string[];
+    correct_index: number;
+}
+interface Quiz {
+    id: number;
+    user_id: number;
+    topic: string;
+    description: string;
+    questions: Question[];
+    created_at: string;
+    updated_at: string;
+}
+
 export default function QuizList() {
-    const [quizzes, setQuizzes] = useState<any[]>([]);
+    const [quizzes, setQuizzes] = useState<Quiz[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
     const [success, setSuccess] = useState('');

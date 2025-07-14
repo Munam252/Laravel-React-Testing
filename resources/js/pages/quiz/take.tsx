@@ -4,9 +4,26 @@ import { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 
+interface Question {
+    id: number;
+    quiz_id: number;
+    question: string;
+    options: string[];
+    correct_index: number;
+}
+interface Quiz {
+    id: number;
+    user_id: number;
+    topic: string;
+    description: string;
+    questions: Question[];
+    created_at: string;
+    updated_at: string;
+}
+
 export default function TakeQuiz(props: any) {
     const quizId = props.quizId;
-    const [quiz, setQuiz] = useState<any>(null);
+    const [quiz, setQuiz] = useState<Quiz | null>(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
     const [answers, setAnswers] = useState<number[]>([]);
@@ -18,7 +35,7 @@ export default function TakeQuiz(props: any) {
         fetch(`/quiz/api/available`)
             .then(res => res.json())
             .then(data => {
-                const found = (data.quizzes || []).find((q: any) => q.id === quizId);
+                const found = (data.quizzes || []).find((q: Quiz) => q.id === quizId);
                 if (found) {
                     setQuiz(found);
                     setAnswers(Array(found.questions.length).fill(-1));
@@ -35,7 +52,7 @@ export default function TakeQuiz(props: any) {
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         let correct = 0;
-        quiz.questions.forEach((q: any, idx: number) => {
+        quiz?.questions.forEach((q: Question, idx: number) => {
             if (answers[idx] === q.correct_index) correct++;
         });
         setScore(correct);
@@ -69,7 +86,7 @@ export default function TakeQuiz(props: any) {
                             <div className="text-sm text-muted-foreground mb-2">{quiz.description}</div>
                             <div className="text-xs text-muted-foreground mb-4">{quiz.questions.length} questions</div>
                         </div>
-                        {quiz.questions.map((q: any, idx: number) => (
+                        {quiz.questions.map((q: Question, idx: number) => (
                             <div key={q.id} className="mb-6 border-b pb-4">
                                 <div className="mb-2 font-medium">Q{idx + 1}: {q.question}</div>
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
@@ -95,7 +112,7 @@ export default function TakeQuiz(props: any) {
                     <div className="w-full max-w-2xl bg-white dark:bg-neutral-900 rounded-lg shadow p-6 flex flex-col items-center">
                         <h2 className="text-2xl font-semibold mb-4">Quiz Results</h2>
                         <p className="text-green-600 mb-4">You scored {score} out of {quiz.questions.length}!</p>
-                        {quiz.questions.map((q: any, idx: number) => (
+                        {quiz.questions.map((q: Question, idx: number) => (
                             <div key={q.id} className="mb-6 border-b pb-4 w-full">
                                 <div className="mb-2 font-medium">Q{idx + 1}: {q.question}</div>
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-2">

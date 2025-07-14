@@ -7,12 +7,40 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Separator } from '@/components/ui/separator';
 import { Edit, Trash2, Eye, User } from 'lucide-react';
 
+interface Question {
+    id: number;
+    quiz_id: number;
+    question: string;
+    options: string[];
+    correct_index: number;
+}
+interface Quiz {
+    id: number;
+    user_id: number;
+    topic: string;
+    description: string;
+    questions: Question[];
+    created_at: string;
+    updated_at: string;
+}
+interface Attempt {
+    id: number;
+    user_id: number;
+    quiz_id: number;
+    score: number;
+    created_at: string;
+    user?: {
+        name: string;
+        email: string;
+    };
+}
+
 export default function QuizView(props: any) {
     const quizId = props.quizId;
-    const [quiz, setQuiz] = useState<any>(null);
+    const [quiz, setQuiz] = useState<Quiz | null>(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
-    const [attempts, setAttempts] = useState<any[]>([]);
+    const [attempts, setAttempts] = useState<Attempt[]>([]);
     const [attemptsLoading, setAttemptsLoading] = useState(false);
     const [attemptsError, setAttemptsError] = useState('');
     const [isOwner, setIsOwner] = useState(false);
@@ -22,7 +50,7 @@ export default function QuizView(props: any) {
         fetch(`/quiz/api/list`)
             .then(res => res.json())
             .then(data => {
-                const found = (data.quizzes || []).find((q: any) => q.id === quizId);
+                const found = (data.quizzes || []).find((q: Quiz) => q.id === quizId);
                 let userId = undefined;
                 if (typeof window !== 'undefined' && (window as any).Laravel && (window as any).Laravel.user) {
                     userId = (window as any).Laravel.user.id;
@@ -66,7 +94,7 @@ export default function QuizView(props: any) {
             } else {
                 alert('Failed to delete quiz.');
             }
-        } catch (e) {
+        } catch {
             alert('Failed to delete quiz.');
         }
     };
@@ -105,7 +133,7 @@ export default function QuizView(props: any) {
                                         <div className="text-xs text-muted-foreground mb-4">{quiz.questions.length} questions</div>
                                     </div>
                                     <Separator className="mb-4" />
-                                    {quiz.questions.map((q: any, idx: number) => (
+                                    {quiz.questions.map((q: Question, idx: number) => (
                                         <div key={q.id} className="mb-8 p-4 rounded-lg bg-blue-50 dark:bg-neutral-900/60 border border-blue-100 dark:border-neutral-800 shadow-sm">
                                             <div className="mb-2 font-medium">Q{idx + 1}: {q.question}</div>
                                             <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
@@ -142,7 +170,7 @@ export default function QuizView(props: any) {
                                                     </tr>
                                                 </thead>
                                                 <tbody>
-                                                    {attempts.map((a) => (
+                                                    {attempts.map((a: Attempt) => (
                                                         <tr key={a.id} className="border-b last:border-b-0">
                                                             <td className="p-2">{a.user?.name || 'Unknown'}</td>
                                                             <td className="p-2">{a.user?.email || ''}</td>

@@ -20,6 +20,22 @@ interface Question {
     isManual?: boolean;
 }
 
+interface Quiz {
+    id: number;
+    user_id: number;
+    topic: string;
+    description: string;
+    questions: {
+        id: number;
+        quiz_id: number;
+        question: string;
+        options: string[];
+        correct_index: number;
+    }[];
+    created_at: string;
+    updated_at: string;
+}
+
 export default function GlobalQuiz() {
     const [topic, setTopic] = useState('');
     const [description, setDescription] = useState('');
@@ -40,7 +56,7 @@ export default function GlobalQuiz() {
             fetch(`/quiz/api/list`)
                 .then(res => res.json())
                 .then(data => {
-                    const quiz = (data.quizzes || []).find((q: any) => q.id === Number(editParam));
+                    const quiz = (data.quizzes || []).find((q: Quiz) => q.id === Number(editParam));
                     if (quiz) {
                         setTopic(quiz.topic);
                         setDescription(quiz.description);
