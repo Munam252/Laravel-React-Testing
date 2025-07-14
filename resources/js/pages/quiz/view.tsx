@@ -174,14 +174,17 @@ export default function QuizView(props: QuizViewProps) {
                                                     </tr>
                                                 </thead>
                                                 <tbody>
-                                                    {attempts.map((a: Attempt) => (
-                                                        <tr key={a.id} className="border-b last:border-b-0">
-                                                            <td className="p-2">{a.user?.name || 'Unknown'}</td>
-                                                            <td className="p-2">{a.user?.email || ''}</td>
-                                                            <td className="p-2 font-semibold text-blue-700 dark:text-blue-300">{a.score}</td>
-                                                            <td className="p-2">{new Date(a.created_at).toLocaleString()}</td>
-                                                        </tr>
-                                                    ))}
+                                                    {attempts.map((a: Attempt) => {
+                                                        const user = a.user as { name?: string; email?: string } | undefined;
+                                                        return (
+                                                            <tr key={a.id} className="border-b last:border-b-0">
+                                                                <td className="p-2">{user?.name || 'Unknown'}</td>
+                                                                <td className="p-2">{user?.email || ''}</td>
+                                                                <td className="p-2 font-semibold text-blue-700 dark:text-blue-300">{a.score}</td>
+                                                                <td className="p-2">{new Date(a.created_at).toLocaleString()}</td>
+                                                            </tr>
+                                                        );
+                                                    })}
                                                 </tbody>
                                             </table>
                                         </div>
