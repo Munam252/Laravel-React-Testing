@@ -175,9 +175,9 @@ export default function QuizView(props: QuizViewProps) {
                                                 </thead>
                                                 <tbody>
                                                     {attempts.map((a: Attempt) => {
-                                                        const user = a.user;
-                                                        const name = user && typeof user.name === 'string' ? user.name : 'Unknown';
-                                                        const email = user && typeof user.email === 'string' ? user.email : '';
+                                                        const user: { name?: string; email?: string } = a.user ?? {};
+                                                        const name = typeof user.name === 'string' ? user.name : 'Unknown';
+                                                        const email = typeof user.email === 'string' ? user.email : '';
                                                         return (
                                                             <tr key={a.id} className="border-b last:border-b-0">
                                                                 <td className="p-2">{name}</td>
