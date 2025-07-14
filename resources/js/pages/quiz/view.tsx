@@ -39,6 +39,16 @@ interface QuizViewProps {
     quizId: number;
 }
 
+function getUserInfo(user: unknown): { name: string; email: string } {
+    if (user && typeof user === 'object' && 'name' in user && 'email' in user) {
+        return {
+            name: (user as { name: string }).name ?? 'Unknown',
+            email: (user as { email: string }).email ?? '',
+        };
+    }
+    return { name: 'Unknown', email: '' };
+}
+
 export default function QuizView(props: QuizViewProps) {
     const quizId = props.quizId;
     const [quiz, setQuiz] = useState<Quiz | null>(null);
@@ -175,11 +185,11 @@ export default function QuizView(props: QuizViewProps) {
                                                 </thead>
                                                 <tbody>
                                                     {attempts.map((a: Attempt) => {
-                                                        const user = a.user as { name?: string; email?: string } | undefined;
+                                                        const { name, email } = getUserInfo(a.user);
                                                         return (
                                                             <tr key={a.id} className="border-b last:border-b-0">
-                                                                <td className="p-2">{user?.name || 'Unknown'}</td>
-                                                                <td className="p-2">{user?.email || ''}</td>
+                                                                <td className="p-2">{name}</td>
+                                                                <td className="p-2">{email}</td>
                                                                 <td className="p-2 font-semibold text-blue-700 dark:text-blue-300">{a.score}</td>
                                                                 <td className="p-2">{new Date(a.created_at).toLocaleString()}</td>
                                                             </tr>
