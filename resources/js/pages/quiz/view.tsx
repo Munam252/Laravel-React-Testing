@@ -35,7 +35,11 @@ interface Attempt {
     };
 }
 
-export default function QuizView(props: any) {
+interface QuizViewProps {
+    quizId: number;
+}
+
+export default function QuizView(props: QuizViewProps) {
     const quizId = props.quizId;
     const [quiz, setQuiz] = useState<Quiz | null>(null);
     const [loading, setLoading] = useState(true);

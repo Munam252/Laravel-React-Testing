@@ -21,7 +21,11 @@ interface Quiz {
     updated_at: string;
 }
 
-export default function TakeQuiz(props: any) {
+interface TakeQuizProps {
+    quizId: number;
+}
+
+export default function TakeQuiz(props: TakeQuizProps) {
     const quizId = props.quizId;
     const [quiz, setQuiz] = useState<Quiz | null>(null);
     const [loading, setLoading] = useState(true);
