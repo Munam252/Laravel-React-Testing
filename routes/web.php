@@ -31,6 +31,23 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('messages', [MessageController::class, 'store'])->name('messages.store');
     Route::get('messages/conversation/{user}', [MessageController::class, 'conversation'])->name('messages.conversation');
     Route::delete('messages/{id}', [MessageController::class, 'destroy'])->name('messages.destroy');
+
+    // Inertia pages
+    Route::get('quiz/global', function () {
+        return Inertia::render('quiz/global');
+    })->name('quiz.global');
+    Route::get('quiz/list', function () {
+        return Inertia::render('quiz/list');
+    })->name('quiz.list');
+    Route::get('quiz/view/{id}', function ($id) {
+        return Inertia::render('quiz/view', ['quizId' => (int)$id]);
+    })->name('quiz.view');
+
+    // API endpoints
+    Route::get('quiz/api/list', [\App\Http\Controllers\QuizController::class, 'index'])->name('quiz.api.list');
+    Route::post('quiz/api/store', [\App\Http\Controllers\QuizController::class, 'store'])->name('quiz.api.store');
+    Route::put('quiz/api/{quiz}', [\App\Http\Controllers\QuizController::class, 'update'])->name('quiz.api.update');
+    Route::delete('quiz/api/{quiz}', [\App\Http\Controllers\QuizController::class, 'destroy'])->name('quiz.api.destroy');
 });
 
 require __DIR__.'/settings.php';

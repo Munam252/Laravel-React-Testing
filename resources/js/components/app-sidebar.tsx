@@ -23,6 +23,16 @@ const mainNavItems: NavItem[] = [
         href: '/chat',
         icon: MessageCircle,
     },
+    {
+        title: 'Global Quiz',
+        href: '/quiz/global',
+        icon: BookOpen,
+    },
+    {
+        title: 'My Quizzes',
+        href: '/quiz/list',
+        icon: BookOpen,
+    },
 ];
 
 const footerNavItems: NavItem[] = [
