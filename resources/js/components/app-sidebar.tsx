@@ -33,6 +33,11 @@ const mainNavItems: NavItem[] = [
         href: '/quiz/list',
         icon: BookOpen,
     },
+    {
+        title: 'Available Quizzes',
+        href: '/quiz/available',
+        icon: BookOpen,
+    },
 ];
 
 const footerNavItems: NavItem[] = [

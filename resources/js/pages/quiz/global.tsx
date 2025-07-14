@@ -1,11 +1,13 @@
 import AppLayout from '@/layouts/app-layout';
 import { Head } from '@inertiajs/react';
-import { useForm } from '@inertiajs/react';
 import { useState, useEffect } from 'react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Separator } from '@/components/ui/separator';
+import { Save, Plus, Edit, Eye, Trash2 } from 'lucide-react';
 
 interface Option {
     text: string;
@@ -55,7 +57,6 @@ export default function GlobalQuiz() {
         }
     }, []);
 
-    // Mock AI generation for now
     const generateQuestions = () => {
         const sampleQuestions: Question[] = Array.from({ length: numQuestions }, (_, i) => ({
             question: `Sample Question ${i + 1} about ${topic}?`,
@@ -160,98 +161,149 @@ export default function GlobalQuiz() {
     return (
         <AppLayout breadcrumbs={[{ title: 'Global Quiz', href: '/quiz/global' }]}> 
             <Head title="Global Quiz" />
-            <div className="flex flex-col items-center justify-center h-full p-8">
-                <h1 className="text-3xl font-bold mb-4">Global Quiz</h1>
-                {step === 'setup' && (
-                    <form onSubmit={handleSetupSubmit} className="w-full max-w-md bg-white dark:bg-neutral-900 rounded-lg shadow p-6 space-y-6">
-                        <div>
-                            <Label htmlFor="topic">Quiz Topic</Label>
-                            <Input
-                                id="topic"
-                                type="text"
-                                value={topic}
-                                onChange={e => setTopic(e.target.value)}
-                                placeholder="Enter quiz topic (e.g. Science, History)"
-                                required
-                            />
-                        </div>
-                        <div>
-                            <Label htmlFor="description">Quiz Description</Label>
-                            <Textarea
-                                id="description"
-                                value={description}
-                                onChange={e => setDescription(e.target.value)}
-                                placeholder="Enter a brief description about the quiz"
-                                required
-                            />
-                        </div>
-                        <div>
-                            <Label htmlFor="numQuestions">Number of MCQ Questions</Label>
-                            <Input
-                                id="numQuestions"
-                                type="number"
-                                min={1}
-                                max={50}
-                                value={numQuestions}
-                                onChange={e => setNumQuestions(Number(e.target.value))}
-                                required
-                            />
-                        </div>
-                        <Button type="submit" className="w-full">Generate Questions</Button>
-                    </form>
-                )}
-                {step === 'questions' && (
-                    <div className="w-full max-w-2xl bg-white dark:bg-neutral-900 rounded-lg shadow p-6 space-y-8 mt-4">
-                        <h2 className="text-2xl font-semibold mb-2">AI Generated Questions</h2>
-                        {questions.map((q, qIdx) => (
-                            <div key={qIdx} className="mb-6 border-b pb-4">
-                                <div className="mb-2">
-                                    <Label>Question {qIdx + 1}</Label>
-                                    <Input
-                                        type="text"
-                                        value={q.question}
-                                        onChange={e => handleQuestionTextChange(qIdx, e.target.value)}
-                                        placeholder="Enter question text"
-                                        required
-                                    />
-                                </div>
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-2">
-                                    {q.options.map((opt, optIdx) => (
-                                        <div key={optIdx} className="flex items-center gap-2">
+            <div className="flex flex-col items-center justify-center min-h-[80vh] bg-gradient-to-br from-blue-50 via-white to-purple-50 dark:from-neutral-900 dark:via-neutral-950 dark:to-neutral-900 p-4">
+                <div className="w-full max-w-2xl">
+                    <Card className="shadow-xl border-2 border-blue-100 dark:border-neutral-800">
+                        <CardHeader>
+                            <CardTitle className="text-3xl font-bold flex items-center gap-2">
+                                <Edit className="h-6 w-6 text-blue-500" />
+                                {editId ? 'Edit Quiz' : 'Create a Global Quiz'}
+                            </CardTitle>
+                            <CardDescription className="text-base mt-2">
+                                {editId ? 'Update your quiz details and questions below.' : 'Set up a new quiz by providing a topic, description, and number of questions.'}
+                            </CardDescription>
+                        </CardHeader>
+                        <CardContent>
+                            {step === 'setup' && (
+                                <form onSubmit={handleSetupSubmit} className="space-y-6">
+                                    <div>
+                                        <Label htmlFor="topic">Quiz Topic</Label>
+                                        <Input
+                                            id="topic"
+                                            type="text"
+                                            value={topic}
+                                            onChange={e => setTopic(e.target.value)}
+                                            placeholder="Enter quiz topic (e.g. Science, History)"
+                                            required
+                                            className="mt-1"
+                                        />
+                                    </div>
+                                    <div>
+                                        <Label htmlFor="description">Quiz Description</Label>
+                                        <Textarea
+                                            id="description"
+                                            value={description}
+                                            onChange={e => setDescription(e.target.value)}
+                                            placeholder="Enter a brief description about the quiz"
+                                            required
+                                            className="mt-1"
+                                        />
+                                    </div>
+                                    <div>
+                                        <Label htmlFor="numQuestions">Number of MCQ Questions</Label>
+                                        <Input
+                                            id="numQuestions"
+                                            type="number"
+                                            min={1}
+                                            max={50}
+                                            value={numQuestions}
+                                            onChange={e => setNumQuestions(Number(e.target.value))}
+                                            required
+                                            className="mt-1"
+                                        />
+                                    </div>
+                                    <div className="flex justify-end gap-2">
+                                        <Button
+                                            type="submit"
+                                            className="bg-gradient-to-r from-blue-500 to-purple-500 text-white font-semibold shadow-md hover:from-blue-600 hover:to-purple-600"
+                                        >
+                                            <Plus className="h-4 w-4 mr-2" />
+                                            Generate Questions
+                                        </Button>
+                                    </div>
+                                </form>
+                            )}
+                            {step === 'questions' && (
+                                <div className="space-y-8">
+                                    <div className="flex items-center justify-between mb-2">
+                                        <h2 className="text-2xl font-semibold flex items-center gap-2">
+                                            <Eye className="h-5 w-5 text-blue-400" />
+                                            Review & Edit Questions
+                                        </h2>
+                                        <Button variant="outline" onClick={handleAddManualQuestion} className="gap-2">
+                                            <Plus className="h-4 w-4" /> Add Manual Question
+                                        </Button>
+                                    </div>
+                                    <Separator className="mb-4" />
+                                    {questions.map((q, qIdx) => (
+                                        <div key={qIdx} className="mb-8 p-4 rounded-lg bg-blue-50 dark:bg-neutral-900/60 border border-blue-100 dark:border-neutral-800 shadow-sm">
+                                            <div className="mb-2 flex items-center gap-2">
+                                                <Label className="text-base font-medium">Question {qIdx + 1}</Label>
+                                            </div>
                                             <Input
                                                 type="text"
-                                                value={opt.text}
-                                                onChange={e => handleOptionTextChange(qIdx, optIdx, e.target.value)}
-                                                placeholder={`Option ${String.fromCharCode(65 + optIdx)}`}
+                                                value={q.question}
+                                                onChange={e => handleQuestionTextChange(qIdx, e.target.value)}
+                                                placeholder="Enter question text"
                                                 required
+                                                className="mb-3"
                                             />
-                                            <input
-                                                type="radio"
-                                                name={`correct-${qIdx}`}
-                                                checked={q.correctIndex === optIdx}
-                                                onChange={() => handleOptionChange(qIdx, optIdx)}
-                                            />
-                                            <span className="text-xs">Correct</span>
+                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-2">
+                                                {q.options.map((opt, optIdx) => (
+                                                    <div key={optIdx} className="flex items-center gap-2">
+                                                        <Input
+                                                            type="text"
+                                                            value={opt.text}
+                                                            onChange={e => handleOptionTextChange(qIdx, optIdx, e.target.value)}
+                                                            placeholder={`Option ${String.fromCharCode(65 + optIdx)}`}
+                                                            required
+                                                        />
+                                                        <input
+                                                            type="radio"
+                                                            name={`correct-${qIdx}`}
+                                                            checked={q.correctIndex === optIdx}
+                                                            onChange={() => handleOptionChange(qIdx, optIdx)}
+                                                        />
+                                                        <span className="text-xs">Correct</span>
+                                                    </div>
+                                                ))}
+                                            </div>
                                         </div>
                                     ))}
+                                    <Separator className="my-6" />
+                                    <div className="flex justify-end gap-2">
+                                        <Button
+                                            type="button"
+                                            className="bg-gradient-to-r from-blue-500 to-purple-500 text-white font-semibold shadow-md hover:from-blue-600 hover:to-purple-600"
+                                            onClick={handleSaveQuiz}
+                                            disabled={saving}
+                                        >
+                                            {saving ? 'Saving...' : (
+                                                <>
+                                                    <Save className="h-4 w-4 mr-2" />
+                                                    {editId ? 'Update Quiz' : 'Save Quiz'}
+                                                </>
+                                            )}
+                                        </Button>
+                                    </div>
+                                    {errorMsg && <p className="text-red-500 mt-2">{errorMsg}</p>}
+                                    {successMsg && <p className="text-green-600 mt-2">{successMsg}</p>}
                                 </div>
-                            </div>
-                        ))}
-                        <Button type="button" variant="outline" onClick={handleAddManualQuestion} className="mt-2">+ Add Manual Question</Button>
-                        <Button type="button" className="w-full mt-6" onClick={handleSaveQuiz} disabled={saving}>
-                            {saving ? 'Saving...' : 'Save Quiz'}
-                        </Button>
-                        {errorMsg && <p className="text-red-500 mt-2">{errorMsg}</p>}
-                        {successMsg && <p className="text-green-600 mt-2">{successMsg}</p>}
-                    </div>
-                )}
-                {step === 'done' && (
-                    <div className="w-full max-w-md bg-white dark:bg-neutral-900 rounded-lg shadow p-6 flex flex-col items-center">
-                        <h2 className="text-2xl font-semibold mb-4">Quiz Saved!</h2>
-                        <p className="text-green-600 mb-4">Your quiz has been saved successfully.</p>
-                        <Button type="button" onClick={() => window.location.reload()}>Create Another Quiz</Button>
-                    </div>
-                )}
+                            )}
+                            {step === 'done' && (
+                                <div className="w-full flex flex-col items-center py-12">
+                                    <h2 className="text-2xl font-semibold mb-4 text-green-700 dark:text-green-400 flex items-center gap-2">
+                                        <Save className="h-5 w-5" /> Quiz Saved!
+                                    </h2>
+                                    <p className="text-green-600 mb-4">Your quiz has been saved successfully.</p>
+                                    <Button type="button" onClick={() => window.location.reload()} className="bg-gradient-to-r from-blue-500 to-purple-500 text-white font-semibold shadow-md hover:from-blue-600 hover:to-purple-600">
+                                        Create Another Quiz
+                                    </Button>
+                                </div>
+                            )}
+                        </CardContent>
+                    </Card>
+                </div>
             </div>
         </AppLayout>
     );

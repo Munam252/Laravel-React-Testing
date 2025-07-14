@@ -46,6 +46,10 @@
         @inertiaHead
     </head>
     <body class="font-sans antialiased">
+        <script>
+            window.Laravel = window.Laravel || {};
+            window.Laravel.user = @json(Auth::user());
+        </script>
         @inertia
     </body>
 </html>

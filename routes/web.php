@@ -42,12 +42,21 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('quiz/view/{id}', function ($id) {
         return Inertia::render('quiz/view', ['quizId' => (int)$id]);
     })->name('quiz.view');
+    Route::get('quiz/available', function () {
+        return Inertia::render('quiz/available');
+    })->name('quiz.available');
+    Route::get('quiz/take/{id}', function ($id) {
+        return Inertia::render('quiz/take', ['quizId' => (int)$id]);
+    })->name('quiz.take');
 
     // API endpoints
     Route::get('quiz/api/list', [\App\Http\Controllers\QuizController::class, 'index'])->name('quiz.api.list');
     Route::post('quiz/api/store', [\App\Http\Controllers\QuizController::class, 'store'])->name('quiz.api.store');
     Route::put('quiz/api/{quiz}', [\App\Http\Controllers\QuizController::class, 'update'])->name('quiz.api.update');
     Route::delete('quiz/api/{quiz}', [\App\Http\Controllers\QuizController::class, 'destroy'])->name('quiz.api.destroy');
+    Route::get('quiz/api/available', [\App\Http\Controllers\QuizController::class, 'available'])->name('quiz.api.available');
+    Route::post('quiz/api/attempt', [\App\Http\Controllers\QuizController::class, 'attempt'])->name('quiz.api.attempt');
+    Route::get('quiz/api/{quiz}/attempts', [\App\Http\Controllers\QuizController::class, 'attempts'])->name('quiz.api.attempts');
 });
 
 require __DIR__.'/settings.php';
