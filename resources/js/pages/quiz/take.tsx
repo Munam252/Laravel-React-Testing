@@ -67,7 +67,7 @@ export default function TakeQuiz(props: any) {
                 },
                 body: JSON.stringify({ quiz_id: quizId, score: correct }),
             });
-        } catch (e) {
+        } catch {
             // Optionally handle error
         }
     };

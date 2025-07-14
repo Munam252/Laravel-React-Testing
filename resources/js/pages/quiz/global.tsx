@@ -61,7 +61,7 @@ export default function GlobalQuiz() {
                         setTopic(quiz.topic);
                         setDescription(quiz.description);
                         setQuestions(
-                            quiz.questions.map((q: any) => ({
+                            quiz.questions.map((q: { question: string; options: string[]; correct_index: number }) => ({
                                 question: q.question,
                                 options: q.options.map((text: string) => ({ text })),
                                 correctIndex: q.correct_index,
@@ -167,7 +167,7 @@ export default function GlobalQuiz() {
                 setSuccessMsg('Quiz saved successfully!');
                 setStep('done');
             }
-        } catch (e) {
+        } catch {
             setErrorMsg('Failed to save quiz.');
         } finally {
             setSaving(false);
